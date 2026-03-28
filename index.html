@@ -97,13 +97,8 @@
         .modal-content {
             background: #111; border: 3px solid var(--deck-wood); border-radius: 25px;
             padding: 30px; width: 100%; max-width: 400px; text-align: center;
-            box-shadow: 0 0 50px rgba(210, 153, 94, 0.4);
-            animation: zoomIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        @keyframes zoomIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .modal-content i.fa-trophy { font-size: 4rem; color: var(--star-active); margin-bottom: 15px; display: block; }
         .winner-name { font-size: 1.8rem; font-weight: 900; margin: 15px 0; color: #fff; text-transform: uppercase; }
-        .btn-close-modal { background: none; border: 1px solid #444; color: #888; padding: 10px; border-radius: 10px; cursor: pointer; margin-top: 15px; width: 100%; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -144,38 +139,38 @@
                 <div class="stat-card">
                     <i class="fas fa-users"></i>
                     <div class="stat-num" id="total-avaliacoes">0</div>
-                    <div class="stat-label">Total de Avaliações</div>
+                    <div class="stat-label">Total</div>
                 </div>
             </div>
 
             <button class="btn-action btn-sorteio" id="btn-sortear">
-                <i class="fas fa-gift"></i> Sortear Picanha P/2
+                <i class="fas fa-trophy"></i> SORTEAR PICANHA P/2
             </button>
             <button class="btn-action btn-atualizar" onclick="carregarDados()">
-                <i class="fas fa-sync-alt"></i> Atualizar Dados
+                <i class="fas fa-sync-alt"></i> ATUALIZAR DADOS
             </button>
 
             <h2 class="section-title"><i class="fas fa-comments"></i> Últimas Avaliações</h2>
-            <div id="loading" style="text-align:center; padding:20px; font-weight:bold; color:var(--deck-wood);"><i class="fas fa-spinner fa-spin"></i> Carregando...</div>
+            <div id="loading" style="text-align:center; padding:20px; font-weight:bold; color:var(--deck-wood);"><i class="fas fa-spinner fa-spin"></i> CARREGANDO...</div>
             <div id="lista-avaliacoes"></div>
         </div>
     </div>
 
     <div id="modal-sorteio">
         <div class="modal-content">
-            <i class="fas fa-trophy"></i>
-            <h2 style="color: var(--deck-wood);">Temos um Ganhador!</h2>
+            <i class="fas fa-gift" style="font-size:3rem; color:var(--deck-wood); margin-bottom:10px;"></i>
+            <h2 style="color: var(--deck-wood);">TEMOS UM GANHADOR!</h2>
             <div class="winner-name" id="win-nome">NOME</div>
-            <span id="win-zap" style="color:#aaa; display:block; margin-bottom:20px;">(00) 00000-0000</span>
             <a href="#" id="btn-zap-ganhador" target="_blank" class="btn-action" style="background:#25D366; color:white;">
                 <i class="fab fa-whatsapp"></i> AVISAR PELO WHATSAPP
             </a>
-            <button class="btn-close-modal" onclick="fecharModal()">FECHAR JANELA</button>
+            <button onclick="document.getElementById('modal-sorteio').style.display='none'" style="background:none; border:none; color:#888; margin-top:15px; cursor:pointer;">Fechar Janela</button>
         </div>
     </div>
 
     <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbw0kKVol2sjUI2oXhv28n62slRX5vFAhIBhIMdj6pAYCweBVrYhZMFSkQ9IB4-Tp2VumA/exec';
+        // 🚨 COLE SEU LINK NOVO AQUI 🚨
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbyH8WZkwCxFZi1vdbayA8e-FqcUspJTZyIqr7e9Hqpdk8rHHatEJPaB6s9KyseYqrh_rA/exec'; 
         const SENHA_CORRETA = "Deck2026";
         let dadosGlobais = [];
 
@@ -195,8 +190,6 @@
             for(let i=1; i<=5; i++) h += (i <= num) ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
             return h;
         }
-
-        function cleanZap(zap) { return zap ? zap.toString().replace(/\D/g, '') : ''; }
 
         function carregarDados() {
             const listDiv = document.getElementById('lista-avaliacoes');
@@ -224,12 +217,12 @@
                 let html = '';
                 for(let i = data.length - 1; i >= 0; i--) {
                     let d = data[i];
-                    let zapLimpo = cleanZap(d.whatsapp);
+                    let zap = d.whatsapp ? d.whatsapp.toString().replace(/\D/g, '') : '';
                     
-                    // Extrai data e hora separadamente
-                    const dataObj = new Date(d.dataRegistro);
-                    const dataFormatada = dataObj.toLocaleDateString('pt-BR');
-                    const horaFormatada = dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                    // Separa Data e Hora do texto formatado (ex: "28/03/2026 17:30:00")
+                    let partes = d.dataRegistro ? d.dataRegistro.split(' ') : ['Sem data', ''];
+                    let dataFormatada = partes[0];
+                    let horaFormatada = partes[1] ? partes[1].substring(0,5) : '';
                     
                     html += `
                     <div class="review-card">
@@ -247,14 +240,12 @@
                             <div class="star-row"><span>👍 Indicação:</span><span style="color:var(--star-active)">${renderStars(d.recomenda)}</span></div>
                         </div>
 
-                        <div class="review-info"><i class="fas fa-map-marker-alt"></i> Nos conheceu via: <strong>${d.comoConheceu || 'Não informado'}</strong></div>
+                        <div class="review-info">Via: ${d.comoConheceu || 'Não informado'}</div>
                         <div class="review-text">${d.sugestoes || '<i>Sem sugestões escritas</i>'}</div>
                         
-                        <div class="review-contact">
-                            <a href="https://wa.me/55${zapLimpo}" target="_blank" class="btn-zap">
-                                <i class="fab fa-whatsapp"></i> Chamar Cliente
-                            </a>
-                        </div>
+                        <a href="https://wa.me/55${zap}" target="_blank" class="btn-zap">
+                            <i class="fab fa-whatsapp"></i> Chamar Cliente
+                        </a>
                     </div>`;
                 }
                 listDiv.innerHTML = html;
@@ -264,10 +255,8 @@
         document.getElementById('btn-sortear').addEventListener('click', () => {
             if(!dadosGlobais.length) return alert("Sem dados!");
             let g = dadosGlobais[Math.floor(Math.random() * dadosGlobais.length)];
-            let zapLimpo = cleanZap(g.whatsapp);
             document.getElementById('win-nome').innerText = g.nome;
-            document.getElementById('win-zap').innerText = g.whatsapp;
-            document.getElementById('btn-zap-ganhador').href = `https://wa.me/55${zapLimpo}?text=Olá ${g.nome}! Parabéns, você ganhou o sorteio da Picanha no Deck Churrascaria! 🥩🎉`;
+            document.getElementById('btn-zap-ganhador').href = `https://wa.me/55${g.whatsapp.toString().replace(/\D/g, '')}?text=Olá ${g.nome}! Parabéns, você ganhou o sorteio do Deck! 🥩🎉`;
             document.getElementById('modal-sorteio').style.display = 'flex';
         });
 
