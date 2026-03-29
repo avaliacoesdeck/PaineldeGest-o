@@ -85,6 +85,15 @@
         .star-row { font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
         
         .review-info { font-size: 0.85rem; color: var(--deck-wood); margin: 10px 0; font-weight: bold; }
+        
+        /* NOVOS DADOS DO CLIENTE */
+        .client-data { 
+            font-size: 0.8rem; color: #ccc; margin: 10px 0; padding: 10px 0; 
+            border-top: 1px dashed rgba(255,255,255,0.1); 
+            border-bottom: 1px dashed rgba(255,255,255,0.1); line-height: 1.6; 
+        }
+        .client-data i { color: var(--deck-wood); width: 20px; text-align: center; }
+
         .review-text { font-size: 0.9rem; color: #ddd; font-style: italic; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; }
         .btn-zap { background: #25D366; color: white; text-decoration: none; padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; display: inline-flex; align-items: center; gap: 5px; margin-top: 10px; }
 
@@ -170,7 +179,7 @@
 
     <script>
         // 🚨 COLE SEU LINK NOVO AQUI 🚨
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbyH8WZkwCxFZi1vdbayA8e-FqcUspJTZyIqr7e9Hqpdk8rHHatEJPaB6s9KyseYqrh_rA/exec'; 
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbyOXm5b_mIlw-woDMcGCE-vefmWuqhwrlYFXw0VIb5KvTZJuDdES6HwTUbiEN87MRTszw/exec';  
         const SENHA_CORRETA = "Deck2026";
         let dadosGlobais = [];
 
@@ -219,7 +228,7 @@
                     let d = data[i];
                     let zap = d.whatsapp ? d.whatsapp.toString().replace(/\D/g, '') : '';
                     
-                    // Separa Data e Hora do texto formatado (ex: "28/03/2026 17:30:00")
+                    // Separa Data e Hora do texto formatado
                     let partes = d.dataRegistro ? d.dataRegistro.split(' ') : ['Sem data', ''];
                     let dataFormatada = partes[0];
                     let horaFormatada = partes[1] ? partes[1].substring(0,5) : '';
@@ -240,7 +249,13 @@
                             <div class="star-row"><span>👍 Indicação:</span><span style="color:var(--star-active)">${renderStars(d.recomenda)}</span></div>
                         </div>
 
-                        <div class="review-info">Nos conheçeu Via: ${d.comoConheceu || 'Não informado'}</div>
+                        <div class="review-info">Via: ${d.comoConheceu || 'Não informado'}</div>
+                        
+                        <div class="client-data">
+                            <i class="fas fa-birthday-cake"></i> ${d.nascimento || 'Não informado'}<br>
+                            <i class="fas fa-envelope"></i> ${d.email || 'Não informado'}
+                        </div>
+
                         <div class="review-text">${d.sugestoes || '<i>Sem sugestões escritas</i>'}</div>
                         
                         <a href="https://wa.me/55${zap}" target="_blank" class="btn-zap">
