@@ -60,7 +60,6 @@
 
         .review-text { font-size: 0.9rem; color: #ddd; font-style: italic; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; }
         
-        /* BOTOES ZAP */
         .btn-zap { background: #25D366; color: white; text-decoration: none; padding: 12px; border-radius: 10px; font-size: 0.85rem; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; }
         .btn-niver { background: #ffc107; color: #000; border: 2px solid #fff; animation: pulseGold 1.5s infinite; }
         @keyframes pulseGold { 0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); } }
@@ -116,7 +115,7 @@
     </div>
 
     <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbyOXm5b_mIlw-woDMcGCE-vefmWuqhwrlYFXw0VIb5KvTZJuDdES6HwTUbiEN87MRTszw/exec';  
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzk9ncze-aiRWwIhhG_imzzPA-2VUn0Kv4mIEKl29JpLeXLwXpsoKelZYnEL57ibnuJeQ/exec';  
         const SENHA_CORRETA = "Deck2026";
         let dadosGlobais = [];
 
@@ -134,38 +133,39 @@
             for(let i=1; i<=5; i++) h += (i <= num) ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
             return h;
         }
-
         function carregarDados() {
             const listDiv = document.getElementById('lista-avaliacoes');
             const loadDiv = document.getElementById('loading');
             loadDiv.style.display = 'block';
 
             fetch(scriptURL).then(res => res.json()).then(data => {
-                // AGORA LEMOS DO OBJETO 'avaliacoes'
-                dadosGlobais = data.avaliacoes;
+                // O ERRO ESTAVA AQUI: Agora recebemos os dados direto (sem o .avaliacoes)
+                dadosGlobais = data; 
+                
                 loadDiv.style.display = 'none';
                 document.getElementById('total-avaliacoes').innerText = dadosGlobais.length;
                 
                 let sRef=0, sAtend=0, sRec=0;
-                dadosAvaliacoes = dadosGlobais; // Sincroniza para o sorteio
-                dadosAvaliacoes.forEach(d => {
+                
+                // Faz a conta das médias
+                dadosGlobais.forEach(d => {
                     sRef += (parseInt(d.refeicao) || 0);
                     sAtend += (parseInt(d.atendimento) || 0);
                     sRec += (parseInt(d.recomenda) || 0);
                 });
                 
-                const n = dadosAvaliacoes.length || 1;
+                const n = dadosGlobais.length || 1;
                 document.getElementById('med-refeicao').innerText = (sRef/n).toFixed(1);
                 document.getElementById('med-atendimento').innerText = (sAtend/n).toFixed(1);
                 document.getElementById('med-recomenda').innerText = (sRec/n).toFixed(1);
 
                 let html = '';
-                for(let i = dadosAvaliacoes.length - 1; i >= 0; i--) {
-                    let d = dadosAvaliacoes[i];
+                for(let i = dadosGlobais.length - 1; i >= 0; i--) {
+                    let d = dadosGlobais[i];
                     let zap = d.whatsapp ? d.whatsapp.toString().replace(/\D/g, '') : '';
                     let partes = d.dataRegistro ? d.dataRegistro.split(' ') : ['-', '-'];
                     
-                    // LÓGICA DO BOTÃO EXTRA DE ANIVERSÁRIO
+                    // Verifica se existe as colunas de aniversário no script (opcional)
                     let btnNiver = d.isAniversariante ? `
                         <a href="${d.linkNiver}" target="_blank" class="btn-zap btn-niver">
                             <i class="fas fa-birthday-cake"></i> ENVIAR MIMO DE NÍVER
@@ -174,7 +174,7 @@
                     html += `
                     <div class="review-card" ${d.isAniversariante ? 'style="border: 2px solid #25D366; background: rgba(37, 211, 102, 0.1);"' : ''}>
                         <div class="review-header">
-                            <span class="review-name">${d.nome} ${d.isAniversariante ? '🎂' : ''}</span>
+                            <span class="review-name">${d.nome || 'Cliente'} ${d.isAniversariante ? '🎂' : ''}</span>
                             <div class="review-date-box">${partes[0]}<span class="review-time"><i class="far fa-clock"></i> ${partes[1].substring(0,5)}</span></div>
                         </div>
                         <div class="review-stars-box">
@@ -182,7 +182,9 @@
                             <div class="star-row"><span>🛎️ Atendimento:</span><span style="color:var(--star-active)">${renderStars(d.atendimento)}</span></div>
                             <div class="star-row"><span>👍 Indicação:</span><span style="color:var(--star-active)">${renderStars(d.recomenda)}</span></div>
                         </div>
-                        <div class="review-info">Via: ${d.comoConheceu || 'Não informado'}</div>
+                        
+                        <div class="review-info">Via: ${d.como_conheceu || 'Não informado'} ${d.detalhe_origem ? '(' + d.detalhe_origem + ')' : ''}</div>
+                        
                         <div class="client-data"><i class="fas fa-birthday-cake"></i> ${d.nascimento || '-'}<br><i class="fas fa-envelope"></i> ${d.email || '-'}</div>
                         <div class="review-text">${d.sugestoes || '<i>Sem sugestões escritas</i>'}</div>
                         
@@ -194,8 +196,12 @@
                     </div>`;
                 }
                 listDiv.innerHTML = html;
-            }).catch(err => { loadDiv.innerText = "Erro ao carregar dados."; });
+            }).catch(err => { 
+                console.error(err);
+                loadDiv.innerText = "Erro ao carregar dados do Google."; 
+            });
         }
+
 
         document.getElementById('btn-sortear').addEventListener('click', () => {
             if(!dadosGlobais.length) return alert("Sem dados!");
